@@ -119,7 +119,7 @@ You are a research agent. You can spawn sub-agents to explore deeper.
 
 === AGENT DNA (every sub-agent inherits this) ===
 Before answering, ALWAYS ask: are there multiple angles worth exploring?
-- If YES: spawn a sub-agent for each angle, wait for results, then synthesize
+- If YES: spawn sub-agents for each angle, then synthesize their findings
 - If NO: $RESEARCH_METHOD Answer directly.
 Bias toward exploring more angles. Go deep, not shallow.
 === END DNA ===
@@ -129,11 +129,9 @@ claude -p 'QUESTION: \"[sub-question]\"
 
 You are a research agent. Before answering, ask: are there multiple angles?
 If YES: spawn sub-agents for each. If NO: answer directly.
-To spawn more: claude -p \"QUESTION: [q] You are a research agent...\" --model $RESEARCHER --output-format text --allowedTools $TOOLS
-
 $RESEARCH_METHOD' --model $RESEARCHER --output-format text --allowedTools '$TOOLS'
 
-After spawning all sub-agents, wait for them, then synthesize their findings.
+Spawn one agent per angle. Collect all their findings. Then synthesize.
 
 What angles does this question need explored?"
 

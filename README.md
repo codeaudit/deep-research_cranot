@@ -2,36 +2,49 @@
 
 **Turn any question into multi-agent exploration.**
 
+```
+                              ┌─────────────────┐
+                              │  YOUR QUESTION  │
+                              └────────┬────────┘
+                                       │
+                                       ▼
+                              ┌─────────────────┐
+                              │  ORCHESTRATOR   │
+                              │    (Claude)     │
+                              └────────┬────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+                    ▼                  ▼                  ▼
+             ┌────────────┐     ┌────────────┐     ┌────────────┐
+             │ Researcher │     │ Researcher │     │ Researcher │
+             │    (1)     │     │    (2)     │     │   (...)    │
+             └─────┬──────┘     └────────────┘     └─────┬──────┘
+                   │                                     │
+              ┌────┴────┐                           ┌────┴────┐
+              ▼         ▼                           ▼         ▼
+           ┌─────┐   ┌─────┐                     ┌─────┐   ┌─────┐
+           │ Sub │   │ Sub │        ...          │ Sub │   │ Sub │
+           └─────┘   └─────┘                     └─────┘   └─────┘
+
+                         Agents spawn as many
+                       sub-agents as needed (∞)
+
+                                   │
+                                   ▼
+                              ┌─────────┐
+                              │SYNTHESIS│
+                              └─────────┘
+```
+
+*Multi-agent exploration*
+
 ```bash
 ./deep-research.sh "Why do smart people make bad decisions?"
 ```
 
-One agent breaks your question into angles. Each angle gets its own researcher. Researchers can spawn more researchers. Results flow back up into a synthesis.
-
----
-
-## See It In Action
-
-```
-You ask: "Why do startups fail?"
-         │
-         ▼
-    Coordinator decides: "4 angles needed"
-         │
-         ├── Researcher 1 → Founder psychology
-         ├── Researcher 2 → Market timing
-         ├── Researcher 3 → Financial runway
-         └── Researcher 4 → Team dynamics
-                              │
-                              └── Sub-researcher → Hiring mistakes
-         │
-         ▼
-    Final synthesis combining all findings
-```
-
-Each agent asks itself: *"Can I answer this directly, or should I break it down further?"*
-
-Same logic at every level. Unlimited depth. Stops when questions become simple enough to answer.
+Each agent autonomously decides: *break it down further* or *answer directly*.
+Researchers run **in parallel**. Unlimited depth. Results flow back up into synthesis.
 
 ---
 
@@ -97,7 +110,7 @@ Real outputs from actual runs:
 | `-m sonnet -r sonnet` | Deep | Medium | $$ | Good balance |
 | `-m sonnet -r haiku` | Shallow | Fast | $ | Quick answers |
 
-**Cost ranges:** $0.10-0.50 (sonnet+haiku) to $1-5 (opus+sonnet) to $5-15 (opus+opus+web)
+Costs vary by question complexity and depth. Budget accordingly.
 
 ---
 
@@ -118,12 +131,20 @@ This lets Claude spawn more Claude instances. Each instance gets the same "DNA":
 
 ```
 Before answering, ask: are there multiple angles worth exploring?
-- If YES → spawn sub-agents for each angle, wait, synthesize
+- If YES → spawn sub-agents IN PARALLEL, wait for all, synthesize
 - If NO → answer directly
 Bias toward exploring. Go deep, not shallow.
 ```
 
-That's it. Recursive by nature. Each agent can spawn more. The tree grows until questions become atomic.
+Each agent spawns researchers for different angles:
+```bash
+claude -p "sub-question-1" --model sonnet ...
+claude -p "sub-question-2" --model sonnet ...
+claude -p "sub-question-3" --model sonnet ...
+# collect all results, then synthesize
+```
+
+Recursive by nature. Each agent can spawn more. The tree grows until questions become atomic.
 
 ---
 
